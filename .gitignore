@@ -1,0 +1,16 @@
+# Local Claude Code settings
+.claude/settings.local.json
+
+# Downloaded reference files
+*.html
+*_files/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+
+# MCP
+.mcp.json

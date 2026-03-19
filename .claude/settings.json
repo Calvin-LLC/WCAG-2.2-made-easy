@@ -1,47 +1,16 @@
 {
-  "schema": "https://json-schema.org/draft/2020-12/schema",
-  "name": "WCAG 2.0 Accessibility Project",
-  "description": "Claude Code configuration for WCAG 2.0 Level A and AA compliance",
-  "version": "1.0.0",
-  "agents": {
-    "accessibility-reviewer": {
-      "enabled": true,
-      "autoRun": true,
-      "triggers": ["*.html", "*.css", "*.js", "*.jsx", "*.tsx", "*.vue", "*.svelte"]
-    }
-  },
-  "rules": {
-    "wcag-level-a": {
-      "enabled": true,
-      "severity": "error"
-    },
-    "wcag-level-aa": {
-      "enabled": true,
-      "severity": "warning"
-    },
-    "accessibility-patterns": {
-      "enabled": true,
-      "severity": "error"
-    }
-  },
-  "accessibility": {
-    "wcagLevel": "AA",
-    "checkContrast": true,
-    "minContrastRatio": {
-      "normalText": 4.5,
-      "largeText": 3,
-      "uiComponents": 3
-    },
-    "requireAltText": true,
-    "requireLabels": true,
-    "requireLangAttribute": true,
-    "requirePageTitle": true,
-    "requireSkipLink": true,
-    "requireFocusStyles": true,
-    "minTouchTarget": 48,
-    "touchTargetSpacing": 8,
-    "requireReducedMotion": true,
-    "forbidOutlineNone": true,
-    "requireRelativeUnits": true
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/wcag-check.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }

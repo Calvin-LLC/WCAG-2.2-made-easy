@@ -115,6 +115,29 @@ Use this checklist before committing any user-facing code.
 
 ---
 
+## WCAG 2.2 New Requirements
+
+- [ ] **Input fields have `autocomplete` attribute** for personal data
+- [ ] **Accessible name includes visible label text**
+- [ ] **Single-char shortcuts are remappable/disableable**
+- [ ] **Single-pointer alternatives** for multipoint/path gestures
+- [ ] **Actions fire on pointer up** (click), not pointer down
+- [ ] **Motion features have UI alternatives** and can be disabled
+- [ ] **Content works in both orientations** (portrait and landscape)
+- [ ] **Content reflows at 320px** without horizontal scrolling
+- [ ] **Text containers don't clip** with adjusted spacing
+- [ ] **Hover/focus content** is dismissible (Escape), hoverable, persistent
+- [ ] **Focus not obscured** by sticky headers/footers/banners
+- [ ] **Targets at least 24x24 CSS px** (48px recommended)
+- [ ] **Drag operations have click alternatives**
+- [ ] **Help mechanism in consistent location** across pages
+- [ ] **Previously entered data auto-populated** in multi-step forms
+- [ ] **No cognitive function tests for authentication**
+- [ ] **Status messages use ARIA live regions** (role="status", role="alert")
+- [ ] **Non-text elements have 3:1 contrast** (borders, icons, controls)
+
+---
+
 ## Quick Tests
 
 ### Keyboard Test
@@ -150,3 +173,7 @@ Use this checklist before committing any user-facing code.
 8. **`tabindex="5"`** → Use 0 or -1 only
 9. **Fixed pixel heights** → Use relative units
 10. **Assuming mobile = touch** → Use media queries
+11. **Missing autocomplete** → Add autocomplete="name", "email", etc.
+12. **Orientation lock** → Don't restrict to portrait/landscape
+13. **Drag-only sorting** → Add up/down buttons as alternatives
+14. **CAPTCHA text entry** → Use passkeys, email codes, or object recognition

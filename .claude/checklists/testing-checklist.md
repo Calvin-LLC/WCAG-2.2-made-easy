@@ -189,6 +189,83 @@ For each page, verify:
 
 ---
 
+## 8. WCAG 2.2 Specific Tests
+
+### Orientation Test
+- [ ] **Rotate device/resize browser** to landscape
+- [ ] **All content visible** in both orientations
+- [ ] **No forced orientation** (check for orientation meta tag)
+
+### Reflow Test (320px)
+- [ ] **Set browser to 320px width** (or zoom to 400%)
+- [ ] **No horizontal scrollbar** (except data tables, maps)
+- [ ] **All content readable** in single column
+- [ ] **No text truncation**
+
+### Text Spacing Test
+Apply these CSS overrides and verify no content is clipped:
+```css
+* { line-height: 1.5em !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; }
+p { margin-bottom: 2em !important; }
+```
+- [ ] **No text overlapping**
+- [ ] **No text clipped** or hidden
+- [ ] **All functionality still works**
+
+### Pointer/Gesture Test
+- [ ] **All gestures have single-pointer alternatives**
+- [ ] **Pinch-to-zoom has buttons** (+ / -)
+- [ ] **Swipe has next/prev buttons**
+- [ ] **No path-based gesture required**
+
+### Drag Operation Test
+- [ ] **All drag operations have click alternatives**
+- [ ] **Sortable lists have move up/down buttons**
+- [ ] **Sliders use native inputs**
+
+### Target Size Test
+- [ ] **Interactive targets at least 24x24 CSS px**
+- [ ] **Inline links properly spaced**
+- [ ] **Small targets have 24px spacing to neighbors**
+
+### Authentication Test
+- [ ] **Login works with password manager**
+- [ ] **No text CAPTCHA without alternative**
+- [ ] **autocomplete attributes present** on login fields
+
+### Focus Obscured Test
+- [ ] **Tab through page with sticky header**
+- [ ] **Focused element never fully hidden** behind sticky/fixed elements
+- [ ] **Check with cookie banners active**
+
+### Hover/Focus Content Test
+- [ ] **Tooltips dismissible with Escape**
+- [ ] **Can hover over tooltip content**
+- [ ] **Tooltip stays visible** until dismissed
+- [ ] **Focus-triggered content behaves same way**
+
+### Consistent Help Test
+- [ ] **Help link/contact in same location** on every page
+- [ ] **Check 3+ pages** for consistency
+
+### Status Message Test
+- [ ] **Search results count announced** by screen reader
+- [ ] **Form success/error announced** without focus change
+- [ ] **Cart updates announced**
+- [ ] **Check role="status" and aria-live** attributes
+
+### Character Shortcut Test
+- [ ] **Single-key shortcuts can be disabled**
+- [ ] **Shortcuts can be remapped**
+- [ ] **Shortcuts don't fire in text inputs**
+
+### Redundant Entry Test
+- [ ] **Multi-step forms pre-fill** repeated information
+- [ ] **"Same as billing" option** for shipping address
+- [ ] **Previously entered data selectable**
+
+---
+
 ## Bug Report Template
 
 When filing accessibility bugs, include:

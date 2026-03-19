@@ -1,7 +1,7 @@
 /**
  * Accessibility Tests
  *
- * Automated accessibility testing for WCAG 2.0 compliance.
+ * Automated accessibility testing for WCAG 2.2 compliance.
  * Run with: node accessibility-tests.js [url]
  *
  * Requirements:
@@ -17,7 +17,7 @@ try {
     axeCore = require('axe-core');
 } catch (e) {
     console.log('='.repeat(60));
-    console.log('WCAG 2.0 Accessibility Test Suite');
+    console.log('WCAG 2.2 Accessibility Test Suite');
     console.log('='.repeat(60));
     console.log('\nTo run automated browser tests, install dependencies:');
     console.log('  npm install puppeteer axe-core\n');
@@ -29,7 +29,7 @@ try {
     process.exit(0);
 }
 
-// WCAG 2.0 Level A and AA rules
+// WCAG 2.2 Level A and AA rules
 const WCAG_RULES = {
     'level-a': [
         'image-alt',
@@ -47,7 +47,8 @@ const WCAG_RULES = {
         'role-img-alt',
         'scope-attr-valid',
         'tabindex',
-        'video-caption'
+        'video-caption',
+        'label-content-name-mismatch'
     ],
     'level-aa': [
         'color-contrast',
@@ -56,13 +57,15 @@ const WCAG_RULES = {
         'landmark-one-main',
         'meta-viewport',
         'page-has-heading-one',
-        'region'
+        'region',
+        'autocomplete-valid',
+        'target-size'
     ]
 };
 
 async function runTests() {
     console.log('='.repeat(60));
-    console.log('WCAG 2.0 Accessibility Test Suite');
+    console.log('WCAG 2.2 Accessibility Test Suite');
     console.log('='.repeat(60));
     console.log(`\nTesting: ${BASE_URL}\n`);
 
@@ -88,7 +91,7 @@ async function runTests() {
                 axe.run({
                     runOnly: {
                         type: 'tag',
-                        values: ['wcag2a', 'wcag2aa', 'best-practice']
+                        values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice']
                     }
                 }).then(resolve);
             });
@@ -96,7 +99,7 @@ async function runTests() {
 
         // Process violations
         if (axeResults.violations.length > 0) {
-            console.log('❌ VIOLATIONS FOUND:\n');
+            console.log('[FAIL] VIOLATIONS FOUND:\n');
 
             axeResults.violations.forEach((violation, index) => {
                 totalViolations += violation.nodes.length;
@@ -132,9 +135,9 @@ async function runTests() {
         // Summary
         console.log('-'.repeat(60));
         console.log('\nSUMMARY:');
-        console.log(`  ✓ Passed: ${totalPasses} rules`);
-        console.log(`  ✗ Failed: ${axeResults.violations.length} rules (${totalViolations} elements)`);
-        console.log(`  ⊘ Incomplete: ${axeResults.incomplete.length} (need manual review)`);
+        console.log(`  [PASS] Passed: ${totalPasses} rules`);
+        console.log(`  [FAIL] Failed: ${axeResults.violations.length} rules (${totalViolations} elements)`);
+        console.log(`  [REVIEW] Incomplete: ${axeResults.incomplete.length} (need manual review)`);
 
         // Severity breakdown
         if (axeResults.violations.length > 0) {
@@ -169,9 +172,9 @@ async function runTests() {
         });
 
         if (focusCheck) {
-            console.log('⚠️  Warning: Found "outline: none" on :focus - ensure replacement focus style exists');
+            console.log('[WARN] Warning: Found "outline: none" on :focus - ensure replacement focus style exists');
         } else {
-            console.log('✓  Focus styles: No blanket outline removal detected');
+            console.log('[PASS] Focus styles: No blanket outline removal detected');
         }
 
         // Check for touch target sizes
@@ -193,12 +196,12 @@ async function runTests() {
         });
 
         if (touchTargetCheck.length > 0) {
-            console.log(`⚠️  Warning: ${touchTargetCheck.length} touch targets may be too small (<44px)`);
+            console.log(`[WARN] Warning: ${touchTargetCheck.length} touch targets may be too small (<44px)`);
             touchTargetCheck.slice(0, 3).forEach(el => {
                 console.log(`   - ${el.tag}: ${el.width}x${el.height}px "${el.text}"`);
             });
         } else {
-            console.log('✓  Touch targets: All appear to meet minimum size');
+            console.log('[PASS] Touch targets: All appear to meet minimum size');
         }
 
         // Check for reduced motion support
@@ -221,9 +224,9 @@ async function runTests() {
         });
 
         if (motionCheck) {
-            console.log('✓  Reduced motion: prefers-reduced-motion media query found');
+            console.log('[PASS] Reduced motion: prefers-reduced-motion media query found');
         } else {
-            console.log('⚠️  Note: No prefers-reduced-motion media query detected');
+            console.log('[WARN] Note: No prefers-reduced-motion media query detected');
         }
 
         // Check for skip link
@@ -233,22 +236,91 @@ async function runTests() {
         });
 
         if (skipLinkCheck) {
-            console.log('✓  Skip link: Found');
+            console.log('[PASS] Skip link: Found');
         } else {
-            console.log('⚠️  Warning: No skip link detected');
+            console.log('[WARN] Warning: No skip link detected');
+        }
+
+        // WCAG 2.1/2.2 Additional Checks
+
+        // Check for orientation lock via meta tag
+        const orientationCheck = await page.evaluate(() => {
+            const meta = document.querySelector('meta[name="viewport"]');
+            if (!meta) return false;
+            const content = meta.getAttribute('content') || '';
+            return content.includes('orientation');
+        });
+
+        if (orientationCheck) {
+            console.log('[WARN] Warning: Viewport meta tag may restrict orientation (1.3.4)');
+        } else {
+            console.log('[PASS] Orientation: No orientation lock in viewport meta');
+        }
+
+        // Check for autocomplete on personal data inputs
+        const autocompleteCheck = await page.evaluate(() => {
+            const personalInputs = document.querySelectorAll(
+                'input[type="text"][name*="name"], input[type="email"], input[type="tel"], ' +
+                'input[type="text"][name*="address"], input[type="text"][name*="city"], ' +
+                'input[type="text"][name*="zip"], input[type="text"][name*="postal"], ' +
+                'input[type="password"]'
+            );
+            const missing = [];
+            personalInputs.forEach(input => {
+                if (!input.getAttribute('autocomplete')) {
+                    missing.push(input.name || input.id || input.type);
+                }
+            });
+            return missing;
+        });
+
+        if (autocompleteCheck.length > 0) {
+            console.log(`[WARN] Warning: ${autocompleteCheck.length} input(s) missing autocomplete attribute (1.3.5)`);
+            autocompleteCheck.slice(0, 3).forEach(name => {
+                console.log(`   - ${name}`);
+            });
+        } else {
+            console.log('[PASS] Autocomplete: Personal data inputs have autocomplete attributes');
+        }
+
+        // Check for target size (WCAG 2.2 - 24px minimum)
+        const targetSizeCheck = await page.evaluate(() => {
+            const clickables = document.querySelectorAll('button, a, [role="button"], input[type="submit"], input[type="checkbox"], input[type="radio"]');
+            const small = [];
+            clickables.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if ((rect.width > 0 && rect.width < 24) || (rect.height > 0 && rect.height < 24)) {
+                    small.push({
+                        tag: el.tagName,
+                        width: Math.round(rect.width),
+                        height: Math.round(rect.height),
+                        text: (el.textContent || '').substring(0, 20).trim()
+                    });
+                }
+            });
+            return small;
+        });
+
+        if (targetSizeCheck.length > 0) {
+            console.log(`[WARN] Warning: ${targetSizeCheck.length} target(s) below 24x24px minimum (2.5.8)`);
+            targetSizeCheck.slice(0, 3).forEach(el => {
+                console.log(`   - ${el.tag}: ${el.width}x${el.height}px "${el.text}"`);
+            });
+        } else {
+            console.log('[PASS] Target size: All targets meet 24x24px minimum');
         }
 
         // Return results
         console.log('\n' + '='.repeat(60));
 
         if (totalViolations === 0) {
-            console.log('\n✅ All automated accessibility tests passed!\n');
+            console.log('\n[PASS] All automated accessibility tests passed!\n');
             console.log('Note: Automated tests catch ~30% of issues.');
             console.log('Manual testing with keyboard and screen reader is essential.\n');
             await browser.close();
             process.exit(0);
         } else {
-            console.log(`\n❌ Found ${totalViolations} accessibility issues to fix.\n`);
+            console.log(`\n[FAIL] Found ${totalViolations} accessibility issues to fix.\n`);
             await browser.close();
             process.exit(1);
         }

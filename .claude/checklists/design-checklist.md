@@ -42,7 +42,7 @@ WRONG:
 [Red text] Error        [Green text] Success
 
 CORRECT:
-⚠ Error: Invalid email  ✓ Success: Saved
+[ERROR] Invalid email  [OK] Success: Saved
 ```
 
 ---
@@ -176,6 +176,53 @@ CORRECT:
 
 ---
 
+## WCAG 2.2 Design Considerations
+
+### Orientation
+- [ ] **Design works in portrait AND landscape**
+- [ ] **No orientation lock** unless essential (e.g., piano app)
+
+### Reflow
+- [ ] **Design works at 320px width** (single column)
+- [ ] **No horizontal scrolling** at 400% zoom
+- [ ] **Data tables may scroll** (exception)
+
+### Text Spacing
+- [ ] **Text containers flexible height** (no clipping)
+- [ ] **Design tolerates** 1.5x line height, 2x paragraph spacing
+- [ ] **No fixed-height text boxes**
+
+### Hover/Focus Content
+- [ ] **Tooltips dismissible** (Escape key)
+- [ ] **Tooltips stay visible** while hovering over them
+- [ ] **Tooltips persist** until user dismisses or moves away
+
+### Focus Visibility
+- [ ] **Focused elements not hidden** behind sticky headers/footers/banners
+- [ ] **Account for cookie banners, chat widgets, sticky navs**
+
+### Target Size
+- [ ] **Minimum target size: 24x24 CSS px** (WCAG 2.2 requirement)
+- [ ] **Recommended: 44-48px** for comfortable interaction
+- [ ] **Inline text links exempt** if spaced properly
+
+### Drag Alternatives
+- [ ] **Every drag operation has a tap/click alternative**
+- [ ] **Sortable lists have up/down buttons**
+- [ ] **Sliders use native range inputs**
+
+### Authentication
+- [ ] **No text-based CAPTCHAs**
+- [ ] **Support password managers** (proper autocomplete)
+- [ ] **Offer passkey/biometric options**
+- [ ] **Magic link or email code as alternative**
+
+### Consistent Help
+- [ ] **Help mechanism in same position** on every page
+- [ ] **Contact info, FAQ, chat** always findable
+
+---
+
 ## Checklist for Design Handoff
 
 Include in design documentation:
@@ -197,8 +244,10 @@ Include in design documentation:
 | Normal text contrast | 4.5:1 | 7:1 |
 | Large text contrast | 3:1 | 4.5:1 |
 | UI contrast | 3:1 | 4.5:1 |
-| Touch target | 48x48px | 48x48px |
+| Target size (minimum) | 24x24px | 44-48px |
+| Touch target (best practice) | 44px | 48px |
 | Touch spacing | 8px | 8px |
 | Base font size | 16px | 16-18px |
 | Line height | 1.4 | 1.5 |
 | Line length | - | 45-75 chars |
+| Reflow width | 320px | - |

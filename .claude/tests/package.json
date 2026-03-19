@@ -1,7 +1,7 @@
 {
   "name": "wcag-accessibility-tests",
   "version": "1.0.0",
-  "description": "WCAG 2.0 Accessibility Testing Suite",
+  "description": "WCAG 2.2 Accessibility Testing Suite",
   "scripts": {
     "test": "node accessibility-tests.js",
     "test:url": "node accessibility-tests.js"

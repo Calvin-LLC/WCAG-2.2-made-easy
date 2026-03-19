@@ -1,103 +1,47 @@
-# WCAG 2.0 Made Easy
+# CLAUDE.md
 
-## Project Overview
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-A comprehensive, ready-to-use accessibility toolkit for WCAG 2.0 Level A and AA compliance. Drop the `.claude` folder into any web project.
+## Project Purpose
 
-## Quick Start
+A portable WCAG 2.2 accessibility toolkit for Claude Code. Users copy the `.claude/` folder into their web projects to get automatic Level A + AA enforcement. This is not a web application -- it is a Claude Code configuration package.
 
-```bash
-# Copy to your project
-cp -r WCAG-2.0-made-easy/.claude your-project/
-```
+## Architecture
 
-## What's Included
+The toolkit uses a **token-optimized, path-scoped** architecture:
 
-### Rules (Claude Code will enforce these)
-- **wcag-level-a.md** - Minimum accessibility (CRITICAL)
-- **wcag-level-aa.md** - Standard accessibility (TARGET)
-- **accessibility-patterns.md** - Code patterns to follow/avoid
+- **`rules/wcag-core.md`** (no paths frontmatter) -- always loaded. Contains anti-patterns to block, key thresholds (contrast ratios, target sizes), and the full criteria reference list. Keep this minimal since it loads into every conversation.
+- **`rules/wcag-html.md`**, **`wcag-css.md`**, **`wcag-js.md`** -- path-scoped rules that only load when Claude opens matching file types (e.g., HTML rules don't load when editing CSS). This is the primary token savings mechanism.
+- **`hooks/wcag-check.sh`** -- PostToolUse hook that runs after every Edit/Write. Validates the written file with grep-based checks and returns `{"decision":"block"}` JSON to Claude on violations. Uses `$CLAUDE_PROJECT_DIR` for path traversal protection.
+- **`skills/accessibility-patterns/`** -- on-demand patterns (zero baseline cost). Only loaded when the skill is invoked.
+- **`agents/accessibility-reviewer.md`** -- WCAG 2.2 review agent with POUR workflow checklist. Contains no code examples (those are in rules and skills).
+- **`checklists/`** -- developer, design, and QA references. Static content, not loaded as rules.
 
-### Agent
-- **accessibility-reviewer** - WCAG 2.0 specialist that reviews HTML, CSS, JS
+## Key Design Decisions
 
-### Checklists
-- **developer-checklist.md** - Before every commit
-- **design-checklist.md** - During design phase
-- **testing-checklist.md** - QA accessibility testing
+- **One canonical location per pattern**: each code pattern exists in exactly one file. The rules reference what to enforce; the skill contains the copy-paste examples.
+- **Anti-pattern-first rules**: Claude already knows accessible HTML/CSS/JS. Rules focus on what to BLOCK and what THRESHOLDS to enforce, not tutorials.
+- **WCAG 2.2 only**: the Parsing criterion (4.1.1) was removed in WCAG 2.2. Do not reference it anywhere. 55 criteria total (31 A + 24 AA).
 
-### Skills
-- **accessibility-patterns** - Reusable accessible code patterns
-
-### Tests
-- **accessibility-tests.js** - Automated testing with axe-core
-
-## Key Requirements
-
-### Level A (Minimum - Must Do)
-- All images have alt text
-- All inputs have labels
-- All functionality keyboard accessible
-- No keyboard traps
-- Page language declared
-- Descriptive page titles
-
-### Level AA (Standard - Should Do)
-- Color contrast 4.5:1 (text) / 3:1 (large text, UI)
-- Text resizable to 200%
-- Focus always visible
-- Multiple navigation methods
-- Error suggestions provided
-
-### Additional Best Practices
-- Touch targets: 48x48px minimum
-- Touch spacing: 8px minimum
-- Reduced motion: Respect prefers-reduced-motion
-- Units: Use rem/em, not fixed px
-- Input detection: Don't assume touch from viewport
-
-## WCAG Principles (POUR)
-
-| Principle | User Need | Key Requirements |
-|-----------|-----------|------------------|
-| **Perceivable** | Can perceive content | Alt text, captions, contrast |
-| **Operable** | Can operate UI | Keyboard access, no traps |
-| **Understandable** | Can understand | Clear language, predictable |
-| **Robust** | Works with AT | Valid HTML, ARIA |
-
-## Running Tests
+## Testing
 
 ```bash
-cd .claude/tests
-npm install
-node accessibility-tests.js http://your-site.com
+# Run automated accessibility tests against a URL (requires Node.js)
+cd .claude/tests && npm install && node accessibility-tests.js http://your-site.com
+
+# Validate hook script syntax
+bash -n .claude/hooks/wcag-check.sh
+
+# Test the hook manually with a violating file
+echo '<html><body><img src="x.png"></body></html>' > /tmp/test.html
+echo '{"file_path":"/tmp/test.html"}' | bash .claude/hooks/wcag-check.sh
+# Expected: JSON with decision:"block" for missing lang and alt
 ```
 
-## Manual Testing
+## When Modifying This Toolkit
 
-### Keyboard Test
-1. Tab through entire page
-2. Verify focus is visible
-3. Verify no traps (can always Tab away)
-4. Test Enter/Space on buttons
-5. Test Escape on modals
-
-### Screen Reader Test
-- **Mac**: VoiceOver (Cmd + F5)
-- **Windows**: NVDA (free)
-
-### Browser Tools
-- Lighthouse (Chrome DevTools)
-- axe DevTools extension
-- WAVE extension
-
-## Resources
-
-- [WCAG 2.0 Quick Reference](https://www.w3.org/WAI/WCAG21/quickref/?versions=2.0)
-- [WebAIM](https://webaim.org/)
-- [A11Y Project](https://www.a11yproject.com/)
-- [MDN Accessibility](https://developer.mozilla.org/en-US/docs/Web/Accessibility)
-
-## License
-
-MIT - Use freely in any project.
+- Adding a new rule to `wcag-core.md` increases baseline token cost for ALL conversations. Prefer adding to the path-scoped files instead.
+- The hook script (`wcag-check.sh`) must use POSIX-compatible grep (no `grep -P`). It runs on Windows (Git Bash), macOS, and Linux.
+- The hook reads `$CLAUDE_PROJECT_DIR` to restrict file access to the project root. If this env var is unset, the path check is skipped.
+- `settings.json` configures the PostToolUse hook. The `matcher: "Edit|Write"` means it runs after both Edit and Write tool calls.
+- Keep the criteria reference lists in `wcag-core.md` in sync when modifying coverage. Run: `grep -r "CRITERION_NUMBER" .claude/rules/` to verify coverage.
