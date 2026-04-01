@@ -7,7 +7,7 @@ Inspired by Derek Featherstone's "Accessibility for Web Design" course and [ever
 ## Setup
 
 ```bash
-cp -r WCAG-2.0-made-easy/.claude your-project/
+cp -r WCAG-2.2-made-easy/.claude your-project/
 ```
 
 ## What you get
